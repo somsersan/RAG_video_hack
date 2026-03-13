@@ -1,0 +1,29 @@
+# ── Core ─────────────────────────────────────────────────────────────────────
+torch>=2.1.0
+torchvision>=0.16.0
+
+# ── Scene detection ───────────────────────────────────────────────────────────
+scenedetect[opencv]>=0.6.3
+
+# ── ASR ───────────────────────────────────────────────────────────────────────
+faster-whisper>=1.0.0
+
+# ── Embeddings ────────────────────────────────────────────────────────────────
+transformers>=4.40.0
+sentencepiece>=0.2.0      # required by SiglipTokenizer and BGE-M3 tokenizer
+
+# ── Vector search ─────────────────────────────────────────────────────────────
+# CPU-only faiss (default). For GPU: pip install faiss-gpu
+faiss-cpu>=1.8.0
+
+# ── LLM / VLM (via OpenRouter) ───────────────────────────────────────────────
+openai>=1.12.0
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+Pillow>=10.0.0
+numpy>=1.24.0
+tqdm>=4.66.0
+ffmpeg-python>=0.2.0       # Python wrapper (still needs ffmpeg binary on PATH)
+accelerate>=0.27.0         # speeds up HuggingFace model loading
+python-dotenv>=1.0.0       # .env file support (optional, builtin fallback included)
+gradio>=4.0.0             # Chat UI
