@@ -1,0 +1,216 @@
+[
+  {
+    "query": "момент когда шрек спасает осла от дракона",
+    "query_type": "visual",
+    "video_id": "shrek",
+    "time_spans": [
+      {
+        "start": 2280,
+        "end": 2400
+      }
+    ]
+  },
+  {
+    "query": "шрек и осел смотрят на луну",
+    "query_type": "visual",
+    "video_id": "shrek",
+    "time_spans": [
+      {
+        "start": 2880,
+        "end": 2940
+      }
+    ]
+  },
+  {
+    "query": "фиона превращается в монстра",
+    "query_type": "visual",
+    "video_id": "shrek",
+    "time_spans": [
+      {
+        "start": 3702,
+        "end": 3762
+      }
+    ]
+  },
+  {
+    "query": "поход по мосту над лавой",
+    "query_type": "visual",
+    "video_id": "shrek",
+    "time_spans": [
+      {
+        "start": 1800,
+        "end": 1860
+      }
+    ]
+  },
+  {
+    "query": "шрек стоит с подсолнухом",
+    "query_type": "visual",
+    "video_id": "shrek",
+    "time_spans": [
+      {
+        "start": 3840,
+        "end": 3900
+      }
+    ]
+  },
+  {
+    "query": "фиона с шреком едят рагу",
+    "query_type": "visual",
+    "video_id": "shrek",
+    "time_spans": [
+      {
+        "start": 3480,
+        "end": 3540
+      }
+    ]
+  },
+  {
+    "query": "гг пришли на парковку сера ланселота",
+    "query_type": "visual",
+    "video_id": "shrek",
+    "time_spans": [
+      {
+        "start": 1200,
+        "end": 1260
+      }
+    ]
+  },
+  {
+    "query": "гг пришли на парковку сэра ланселота",
+    "query_type": "visual",
+    "video_id": "shrek",
+    "time_spans": [
+      {
+        "start": 1200,
+        "end": 1260
+      }
+    ]
+  },
+  {
+    "query": "шрек надувает лягушку",
+    "query_type": "visual",
+    "video_id": "shrek",
+    "time_spans": [
+      {
+        "start": 3380,
+        "end": 3440
+      }
+    ]
+  },
+  {
+    "query": "турнир сэра ланселота",
+    "query_type": "visual",
+    "video_id": "shrek",
+    "time_spans": [
+      {
+        "start": 1410,
+        "end": 1470
+      }
+    ]
+  },
+  {
+    "query": "Любимая группа главного героя",
+    "query_type": "visual",
+    "video_id": "brat",
+    "time_spans": [
+      {
+        "start": 240,
+        "end": 245
+      },
+      {
+        "start": 592,
+        "end": 600
+      }
+    ]
+  },
+  {
+    "query": "Сломал ли руку охраннику Данила Багрова?",
+    "query_type": "visual",
+    "video_id": "brat",
+    "time_spans": [
+      {
+        "start": 209,
+        "end": 216
+      }
+    ]
+  },
+  {
+    "query": "крылатая фраза бездомного по отношению к Даниле после того как он спас его поле ограбления на улеченом рынке",
+    "query_type": "visual",
+    "video_id": "brat",
+    "time_spans": [
+      {
+        "start": 720,
+        "end": 733
+      }
+    ]
+  },
+  {
+    "query": "Адрес, где живеет брат Данилы Багрова",
+    "query_type": "visual",
+    "video_id": "brat",
+    "time_spans": [
+      {
+        "start": 1041,
+        "end": 1045
+      }
+    ]
+  },
+  {
+    "query": "Данила убегае от бандитов поле убийства на рынке ",
+    "query_type": "visual",
+    "video_id": "brat",
+    "time_spans": [
+      {
+        "start": 1784,
+        "end": 1790
+      },
+      {
+        "start": 1812,
+        "end": 1830
+      }
+    ]
+  },
+  {
+    "query": "Цвет трамвая на котором данила убегает от бандитов после убийства на рынке",
+    "query_type": "visual",
+    "video_id": "brat",
+    "time_spans": [
+      {
+        "start": 1842,
+        "end": 1850
+      },
+      {
+        "start": 1897,
+        "end": 1925
+      },
+      {
+        "start": 1968,
+        "end": 1975
+      }
+    ]
+  },
+  {
+    "query": "Разговор Данилы и Немца, когда Данила ранен",
+    "query_type": "visual",
+    "video_id": "brat",
+    "time_spans": [
+      {
+        "start": 2135,
+        "end": 2162
+      }
+    ]
+  },
+  {
+    "query": "Концерт, на который пошел данила в этом фильме",
+    "query_type": "visual",
+    "video_id": "brat",
+    "time_spans": [
+      {
+        "start": 2700,
+        "end": 2750
+      }
+    ]
+  }
+]
