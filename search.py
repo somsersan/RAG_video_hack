@@ -26,7 +26,8 @@ import faiss
 import torch
 from transformers import AutoProcessor, AutoModel
 
-from src.embed import SIGLIP_MODEL, _l2_norm, _extract_tensor, load_db
+from src.embed import SIGLIP_MODEL, _l2_norm, _extract_tensor, load_db, load_model
+from src.metadata_schema import transcript_text
 
 
 # ── Query encoding ────────────────────────────────────────────────────────────
@@ -82,7 +83,8 @@ def reciprocal_rank_fusion(
             if fid < 0:   # FAISS returns -1 for missing
                 continue
             scores[fid] = scores.get(fid, 0.0) + 1.0 / (k + rank + 1)
-    return sorted(scores.items(), key=lambda x: -x[1])
+    fused_hits = [(score, fid) for fid, score in scores.items()]
+    return sorted(fused_hits, key=lambda x: -x[0])
 
 
 def weighted_reciprocal_rank_fusion(
@@ -133,7 +135,7 @@ def print_results(
     for rank, (score, fid) in enumerate(hits[:top_k], 1):
         m = metadata[int(fid)]
         time_str = f"{_fmt_time(m['start_sec'])}–{_fmt_time(m['end_sec'])}"
-        transcript = (m["transcript"] or "—")[:55]
+        transcript = (transcript_text(m) or "—")[:55]
         print(f"{rank:<4} {score:>7.4f}  {m['video']:<34} {time_str:<13} {transcript}")
     print(f"{'─'*70}\n")
 
@@ -156,11 +158,15 @@ def main() -> None:
     parser.add_argument("--query",           required=True)
     parser.add_argument("--db_dir",          default="db")
     parser.add_argument("--data_dir",        default="data",
-                        help="Directory with .mp4 files (used by VLM for frame extraction)")
+                        help="Directory with video files (used by VLM for frame extraction)")
     parser.add_argument("--mode",            default="fused",
                         choices=["visual", "speech", "fused"])
     parser.add_argument("--top_k",           type=int, default=5)
     parser.add_argument("--device",          default="cpu")
+    parser.add_argument("--hf_cache_dir",    default=".model_cache/hf",
+                        help="Local cache dir for HuggingFace models")
+    parser.add_argument("--offline_models",  action="store_true",
+                        help="Load models from local cache only (no internet downloads)")
     # VLM re-ranking
     parser.add_argument("--vlm",             action="store_true",
                         help="Re-rank FAISS results with a VLM provider")
@@ -182,8 +188,11 @@ def main() -> None:
 
     # Load model
     print(f"Loading SigLIP …")
-    proc  = AutoProcessor.from_pretrained(SIGLIP_MODEL)
-    model = AutoModel.from_pretrained(SIGLIP_MODEL).to(args.device).eval()
+    model, proc = load_model(
+        args.device,
+        cache_dir=args.hf_cache_dir,
+        local_files_only=args.offline_models,
+    )
 
     # Encode query
     q_vec = encode_query(args.query, model, proc, args.device)

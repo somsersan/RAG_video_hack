@@ -32,6 +32,8 @@ def main() -> None:
     p.add_argument("--language",     default=None)
     p.add_argument("--device",       default="cpu")
     p.add_argument("--compute_type", default="int8")
+    p.add_argument("--download_root", default=None)
+    p.add_argument("--local_files_only", action="store_true")
     args = p.parse_args()
 
     try:
@@ -41,6 +43,8 @@ def main() -> None:
             args.model_size,
             device=args.device,
             compute_type=args.compute_type,
+            download_root=args.download_root,
+            local_files_only=args.local_files_only,
         )
         segments_gen, info = model.transcribe(
             args.audio,

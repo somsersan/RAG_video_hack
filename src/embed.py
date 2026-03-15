@@ -60,19 +60,56 @@ def _extract_tensor(out) -> torch.Tensor:
 
 # ── Model loading ─────────────────────────────────────────────────────────────
 
-def load_visual_model(device: str = "cpu") -> Tuple[AutoModel, AutoProcessor]:
+def load_visual_model(
+    device: str = "cpu",
+    cache_dir: str | None = None,
+    local_files_only: bool = False,
+) -> Tuple[AutoModel, AutoProcessor]:
     """Load SigLIP2 vision+text model for visual embedding and query encoding."""
     print(f"Loading visual model: {SIGLIP_MODEL} …")
-    processor = AutoProcessor.from_pretrained(SIGLIP_MODEL)
-    model     = AutoModel.from_pretrained(SIGLIP_MODEL).to(device).eval()
+    processor = AutoProcessor.from_pretrained(
+        SIGLIP_MODEL,
+        cache_dir=cache_dir,
+        local_files_only=local_files_only,
+    )
+    model = AutoModel.from_pretrained(
+        SIGLIP_MODEL,
+        cache_dir=cache_dir,
+        local_files_only=local_files_only,
+    ).to(device).eval()
     return model, processor
 
 
-def load_text_model(device: str = "cpu") -> Tuple[AutoModel, AutoTokenizer]:
+def load_model(
+    device: str = "cpu",
+    cache_dir: str | None = None,
+    local_files_only: bool = False,
+) -> Tuple[AutoModel, AutoProcessor]:
+    """Backward-compatible alias for visual query model loading."""
+    return load_visual_model(
+        device=device,
+        cache_dir=cache_dir,
+        local_files_only=local_files_only,
+    )
+
+
+def load_text_model(
+    device: str = "cpu",
+    cache_dir: str | None = None,
+    local_files_only: bool = False,
+) -> Tuple[AutoModel, AutoTokenizer]:
     """Load BGE-M3 encoder for text embedding and query encoding."""
     print(f"Loading text model: {BGE_M3_MODEL} …")
-    tokenizer = AutoTokenizer.from_pretrained(BGE_M3_MODEL)
-    model     = AutoModel.from_pretrained(BGE_M3_MODEL).to(device).eval()
+    tokenizer = AutoTokenizer.from_pretrained(
+        BGE_M3_MODEL,
+        cache_dir=cache_dir,
+        local_files_only=local_files_only,
+    )
+    model = AutoModel.from_pretrained(
+        BGE_M3_MODEL,
+        cache_dir=cache_dir,
+        local_files_only=local_files_only,
+    ).to(device).eval()
     return model, tokenizer
 
 
@@ -87,14 +124,51 @@ def _clean_transcript(text: str) -> str:
     return text
 
 
+def _as_str_list(value: object) -> list[str]:
+    if isinstance(value, list):
+        return [str(v).strip() for v in value if str(v).strip()]
+    if isinstance(value, tuple):
+        return [str(v).strip() for v in value if str(v).strip()]
+    if value is None:
+        return []
+    text = str(value).strip()
+    return [text] if text else []
+
+
+def _scene_people_context(scene: dict) -> str:
+    ready = _clean_transcript(str(scene.get("face_context_text") or "")).strip()
+    if ready:
+        return ready
+
+    actors = _as_str_list(scene.get("actors_in_frame"))
+    characters = _as_str_list(scene.get("characters_in_frame"))
+    parts: list[str] = []
+    if actors:
+        parts.append(f"Actors in frame: {', '.join(actors)}")
+    if characters:
+        parts.append(f"Characters in frame: {', '.join(characters)}")
+    return ". ".join(parts).strip()
+
+
 def build_scene_text(scene: dict, max_chars: int = 1500) -> str:
     """Build a text string for embedding from a scene metadata dict."""
-    transcript = _clean_transcript(scene.get("transcript", "")).strip()
-    if len(transcript) > max_chars:
-        transcript = transcript[:max_chars].rsplit(" ", 1)[0]
-    if not transcript:
+    transcript = _clean_transcript(
+        str(scene.get("transcript_text") or scene.get("transcript") or "")
+    ).strip()
+    people_ctx = _scene_people_context(scene)
+
+    parts: list[str] = []
+    if people_ctx:
+        parts.append(people_ctx)
+    if transcript:
+        parts.append(f"Subtitles: {transcript}")
+
+    text = " ".join(parts).strip()
+    if len(text) > max_chars:
+        text = text[:max_chars].rsplit(" ", 1)[0]
+    if not text:
         return PLACEHOLDER_TEXT
-    return f"Subtitles: {transcript}"
+    return text
 
 
 # ── Visual embedding ──────────────────────────────────────────────────────────

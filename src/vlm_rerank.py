@@ -179,7 +179,7 @@ def rerank(
 
         vlm_score, vlm_reason = _call_openrouter(
             query, scene.get("transcript", ""),
-            frames_b64, client, model, use_vision,
+            frames_b64, client, model, provider, use_vision,
         )
         print(
             f"    Scene {scene['video']} [{scene['start_sec']:.1f}s]: "

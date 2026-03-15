@@ -6,7 +6,7 @@
 
 ```mermaid
 flowchart TD
-    A[data/*.mp4] --> B[build_vectordb.py]
+    A[data/*.{mp4,mkv}] --> B[build_vectordb.py]
 
     subgraph OFFLINE["Offline indexing pipeline"]
         B --> C[scene_detect.detect_scenes]

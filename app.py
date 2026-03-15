@@ -16,6 +16,7 @@ API key is read from OPENROUTER_API_KEY env var or .env file.
 """
 
 import argparse
+import csv
 import json
 import math
 import os
@@ -184,8 +185,10 @@ TXT_TOK    = None
 DEVICE     = "cpu"
 DATA_DIR   = Path("data")
 VLM_MODEL  = DEFAULT_LLM_MODEL
+VLM_PROVIDER = "openrouter"
 TOP_K      = 2
 CANDIDATES = 5
+USE_VLM_DEFAULT = True
 
 _TMP_CLIPS: List[str] = []   # track tmp files to clean on exit
 
@@ -267,6 +270,7 @@ def _generate_summary(query: str, results: List[Dict], model: str, api_key: str)
 
 def run_search(
     query: str,
+    vlm_provider: str,
     vlm_model: str,
     top_k: int,
     candidates: int,
@@ -313,6 +317,8 @@ def run_search(
         [vis_ids.tolist(), txt_ids.tolist()],
         [vis_weight, txt_weight],
     )
+    # Respect UI setting: send at most `candidates` items to VLM reranker.
+    hits = hits[:candidates]
 
     if not use_vlm:
         results = []
@@ -339,10 +345,181 @@ def run_search(
     return results, summary, plan
 
 
+def init_runtime(
+    db_dir: str = "db",
+    data_dir: str = "data",
+    device: str = "cpu",
+    vlm_provider: str = "openrouter",
+    vlm_model: str = DEFAULT_LLM_MODEL,
+    top_k: int = 5,
+    candidates: int = 15,
+    api_key: str = "",
+    disable_vlm: bool = False,
+) -> None:
+    """
+    Initialize app runtime without launching Gradio.
+    Can be used from scripts/notebooks for pure function calls.
+    """
+    global VIS_IDX, TXT_IDX, METADATA, VIS_MODEL, VIS_PROC, TXT_MODEL, TXT_TOK
+    global DEVICE, DATA_DIR, VLM_PROVIDER, VLM_MODEL, TOP_K, CANDIDATES, OPENROUTER_API_KEY
+    global USE_VLM_DEFAULT
+
+    DEVICE = device
+    DATA_DIR = Path(data_dir)
+    VLM_PROVIDER = vlm_provider
+    VLM_MODEL = vlm_model
+    TOP_K = top_k
+    CANDIDATES = candidates
+    USE_VLM_DEFAULT = not disable_vlm
+
+    if api_key:
+        OPENROUTER_API_KEY = api_key
+
+    if not OPENROUTER_API_KEY:
+        print(
+            "[WARN] OPENROUTER_API_KEY is not set. "
+            "LLM query rewrite and VLM re-ranking will be skipped.\n"
+            "Set it in .env or as an env var: OPENROUTER_API_KEY=sk-or-..."
+        )
+
+    print("Loading FAISS database …")
+    VIS_IDX, TXT_IDX, METADATA = load_db(db_dir)
+
+    VIS_MODEL, VIS_PROC = load_visual_model(DEVICE)
+    TXT_MODEL, TXT_TOK  = load_text_model(DEVICE)
+    print("Runtime ready.")
+
+
+def search_without_ui(
+    query: str,
+    use_vlm: Optional[bool] = None,
+    use_llm_rewrite: bool = True,
+    api_key: str = "",
+) -> Tuple[List[Dict], str, dict]:
+    """
+    Public function entrypoint for retrieval/rerank without Gradio UI.
+    Requires init_runtime(...) to be called beforehand.
+    """
+    if VIS_IDX is None or TXT_IDX is None or VIS_MODEL is None or TXT_MODEL is None:
+        raise RuntimeError(
+            "Runtime is not initialized. Call init_runtime(...) before search_without_ui(...)."
+        )
+    if use_vlm is None:
+        use_vlm = USE_VLM_DEFAULT
+    return run_search(
+        query=query,
+        vlm_provider=VLM_PROVIDER,
+        vlm_model=VLM_MODEL,
+        top_k=TOP_K,
+        candidates=CANDIDATES,
+        data_dir=str(DATA_DIR),
+        use_vlm=use_vlm,
+        use_llm_rewrite=use_llm_rewrite,
+        api_key=api_key,
+    )
+
+
+def _print_console_results(
+    query: str,
+    results: List[Dict],
+    summary: str,
+    plan: dict,
+    use_llm_rewrite: bool,
+) -> None:
+    print(f"\nQuery: {query}")
+    if use_llm_rewrite:
+        print(
+            f"Plan: visual='{plan['visual_query']}' ({plan['visual_weight']:.0%}), "
+            f"text='{plan['text_query']}' ({plan['text_weight']:.0%})"
+        )
+    print("Results:")
+    for i, r in enumerate(results, 1):
+        ts = f"{_fmt_time(r['start_sec'])}–{_fmt_time(r['end_sec'])}"
+        score = r.get("vlm_score", r.get("faiss_score", 0.0))
+        reason = (r.get("vlm_reason") or "—").replace("\n", " ")
+        print(f"  {i}. {r['video']} {ts} score={score:.3f} reason={reason}")
+    print(f"Summary: {summary}")
+
+
+def _run_headless_mode(args: argparse.Namespace) -> None:
+    use_llm_rewrite = not args.disable_llm_rewrite
+    use_vlm = not args.disable_vlm
+
+    if args.queries_csv:
+        in_path = Path(args.queries_csv)
+        if not in_path.exists():
+            raise FileNotFoundError(f"queries_csv not found: {in_path}")
+
+        rows_out: List[Dict] = []
+        with open(in_path, encoding="utf-8", newline="") as f:
+            reader = csv.DictReader(f)
+            if reader.fieldnames is None:
+                raise ValueError(f"queries_csv has no header: {in_path}")
+            missing = {args.query_col, args.query_id_col} - set(reader.fieldnames)
+            if missing:
+                raise ValueError(f"queries_csv missing columns: {sorted(missing)}")
+
+            for row in reader:
+                qid = row.get(args.query_id_col, "")
+                query = str(row.get(args.query_col, "") or "").strip()
+                if not query:
+                    continue
+                results, summary, plan = search_without_ui(
+                    query=query,
+                    use_vlm=use_vlm,
+                    use_llm_rewrite=use_llm_rewrite,
+                    api_key=args.api_key,
+                )
+                for rank, r in enumerate(results, 1):
+                    score = float(r.get("vlm_score", r.get("faiss_score", 0.0)))
+                    rows_out.append(
+                        {
+                            args.query_id_col: qid,
+                            args.query_col: query,
+                            "rank": rank,
+                            "score": score,
+                            "video": r.get("video", ""),
+                            "start_sec": float(r.get("start_sec", 0.0)),
+                            "end_sec": float(r.get("end_sec", 0.0)),
+                            "reason": r.get("vlm_reason", ""),
+                            "summary": summary,
+                            "visual_query": plan.get("visual_query", ""),
+                            "text_query": plan.get("text_query", ""),
+                            "visual_weight": plan.get("visual_weight", 0.5),
+                            "text_weight": plan.get("text_weight", 0.5),
+                        }
+                    )
+
+        out_path = Path(args.output_csv)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, "w", encoding="utf-8", newline="") as f:
+            if rows_out:
+                fieldnames = list(rows_out[0].keys())
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(rows_out)
+            else:
+                writer = csv.writer(f)
+                writer.writerow([args.query_id_col, args.query_col, "rank", "score", "video", "start_sec", "end_sec"])
+        print(f"Saved headless results: {out_path}")
+        return
+
+    if not args.query.strip():
+        raise ValueError("In --no_ui mode provide --query or --queries_csv")
+
+    results, summary, plan = search_without_ui(
+        query=args.query,
+        use_vlm=use_vlm,
+        use_llm_rewrite=use_llm_rewrite,
+        api_key=args.api_key,
+    )
+    _print_console_results(args.query, results, summary, plan, use_llm_rewrite)
+
+
 # ── Gradio callbacks ──────────────────────────────────────────────────────────
 
 def chat_fn(message: str, history: list,
-            vlm_model: str, top_k: int, candidates: int,
+            vlm_provider: str, vlm_model: str, top_k: int, candidates: int,
             data_dir: str, use_vlm: bool, use_llm_rewrite: bool,
             api_key: str = ""):
     """Main chat handler – returns (updated_history, results_state, choices_update)."""
@@ -359,7 +536,7 @@ def chat_fn(message: str, history: list,
 
     try:
         results, summary, plan = run_search(
-            message, vlm_model, int(top_k), int(candidates),
+            message, vlm_provider, vlm_model, int(top_k), int(candidates),
             data_dir, use_vlm, use_llm_rewrite, api_key,
         )
     except Exception as exc:
@@ -427,6 +604,7 @@ def show_clip(choice: Optional[str], results: list, data_dir: str):
 # ── Build UI ──────────────────────────────────────────────────────────────────
 
 def build_ui() -> gr.Blocks:
+    global USE_VLM_DEFAULT
     with gr.Blocks(title="Video RAG Search") as demo:
         gr.Markdown(
             "# 🎬 Video RAG Search\n"
@@ -481,7 +659,7 @@ def build_ui() -> gr.Blocks:
                         )
                     with gr.Row():
                         use_vlm_chk = gr.Checkbox(
-                            value=True, label="Использовать VLM re-ranking (OpenRouter)"
+                            value=USE_VLM_DEFAULT, label="Использовать VLM re-ranking (OpenRouter)"
                         )
                         use_rewrite_chk = gr.Checkbox(
                             value=True, label="LLM декомпозиция запроса"
@@ -508,7 +686,7 @@ def build_ui() -> gr.Blocks:
         # ── Wiring ────────────────────────────────────────────────────────
         search_inputs = [
             query_box, chatbot,
-            vlm_model_box, top_k_slider, cand_slider, data_dir_box,
+            vlm_provider_box, vlm_model_box, top_k_slider, cand_slider, data_dir_box,
             use_vlm_chk, use_rewrite_chk, api_key_box,
         ]
         search_outputs = [chatbot, results_state, scene_radio, video_player]
@@ -540,53 +718,60 @@ def parse_args():
     p.add_argument("--db_dir",    default="db")
     p.add_argument("--data_dir",  default="data")
     p.add_argument("--device",    default="cpu")
+    p.add_argument("--vlm_provider", default="openrouter", choices=["ollama", "openrouter"])
     p.add_argument("--vlm_model", default=DEFAULT_LLM_MODEL)
     p.add_argument("--top_k",     type=int, default=5)
     p.add_argument("--candidates",type=int, default=15)
+    p.add_argument("--api_key",   default="", help="OpenRouter API key override")
+    p.add_argument(
+        "--disable_vlm",
+        action="store_true",
+        help="Disable VLM reranker and use retriever-only mode by default",
+    )
+    p.add_argument("--no_ui", action="store_true", help="Run in console mode (no Gradio)")
+    p.add_argument("--query", default="", help="Single query for --no_ui mode")
+    p.add_argument("--queries_csv", default="", help="CSV with queries for --no_ui mode")
+    p.add_argument("--output_csv", default="retrieval_topk.csv", help="Output CSV path for --no_ui batch mode")
+    p.add_argument("--query_col", default="question", help="Query text column name for --queries_csv")
+    p.add_argument("--query_id_col", default="query_id", help="Query ID column name for --queries_csv")
+    p.add_argument(
+        "--disable_llm_rewrite",
+        action="store_true",
+        help="Disable LLM query decomposition and use the raw query for both retrievers",
+    )
     p.add_argument("--port",      type=int, default=7860)
     p.add_argument("--share",     action="store_true")
     return p.parse_args()
 
 
 def main():
-    global VIS_IDX, TXT_IDX, METADATA, VIS_MODEL, VIS_PROC, TXT_MODEL, TXT_TOK
-    global DEVICE, DATA_DIR, VLM_MODEL, TOP_K, CANDIDATES, OPENROUTER_API_KEY
-
     args = parse_args()
-    DEVICE     = args.device
-    DATA_DIR   = Path(args.data_dir)
-    VLM_PROVIDER = args.vlm_provider
-    VLM_MODEL  = args.vlm_model
-    TOP_K      = args.top_k
-    CANDIDATES = args.candidates
+    init_runtime(
+        db_dir=args.db_dir,
+        data_dir=args.data_dir,
+        device=args.device,
+        vlm_provider=args.vlm_provider,
+        vlm_model=args.vlm_model,
+        top_k=args.top_k,
+        candidates=args.candidates,
+        api_key=args.api_key,
+        disable_vlm=args.disable_vlm,
+    )
 
-    # Allow overriding the API key via CLI (useful for quick tests)
-    if hasattr(args, "api_key") and args.api_key:
-        OPENROUTER_API_KEY = args.api_key
-
-    if not OPENROUTER_API_KEY:
-        print(
-            "[WARN] OPENROUTER_API_KEY is not set. "
-            "LLM query rewrite and VLM re-ranking will be skipped.\n"
-            "Set it in .env or as an env var: OPENROUTER_API_KEY=sk-or-..."
-        )
-
-    print("Loading FAISS database …")
-    VIS_IDX, TXT_IDX, METADATA = load_db(args.db_dir)
-
-    VIS_MODEL, VIS_PROC = load_visual_model(DEVICE)
-    TXT_MODEL, TXT_TOK  = load_text_model(DEVICE)
-    print("Ready! Starting Gradio …\n")
-
-    demo = build_ui()
-    demo.launch(server_port=args.port, share=args.share, theme=gr.themes.Soft())
-
-    # Cleanup temp clips
-    for f in _TMP_CLIPS:
-        try:
-            os.unlink(f)
-        except OSError:
-            pass
+    try:
+        if args.no_ui:
+            _run_headless_mode(args)
+        else:
+            print("Ready! Starting Gradio …\n")
+            demo = build_ui()
+            demo.launch(server_port=args.port, share=args.share, theme=gr.themes.Soft())
+    finally:
+        # Cleanup temp clips
+        for f in _TMP_CLIPS:
+            try:
+                os.unlink(f)
+            except OSError:
+                pass
 
 
 if __name__ == "__main__":

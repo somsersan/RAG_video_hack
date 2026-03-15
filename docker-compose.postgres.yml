@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: video_rag_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: video_rag
+      POSTGRES_USER: video_rag
+      POSTGRES_PASSWORD: video_rag
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U video_rag -d video_rag"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:

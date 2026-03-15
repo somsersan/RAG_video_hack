@@ -1,0 +1,474 @@
+Found 1 video(s): ['shrek.mp4']
+
+[1/3] Detecting scenes …
+  [shrek.mp4] 1303 scenes detected
+  Total: 1303 scenes → output/all_scenes.json
+  Scenes in memory: 1303 (from 1 video(s))
+
+[2/3] Transcribing audio …
+  (1/1) Processing shrek.mp4 — 1303 scenes
+  [shrek.mp4] Extracting audio …
+  [shrek.mp4] Starting Whisper-base subprocess (device=cpu) …
+  [shrek.mp4] Language: ru (prob=0.96), speech: 3098s
+  [shrek.mp4] whisper: 100%|█████████████████████████████| 3097.92/3097.92 [05:40<00:00,  9.10sec/s]
+  [shrek.mp4] 1387 segments received
+  [shrek.mp4] Assigning 1387 segments to 1303 scenes …
+  [shrek.mp4] Done — 727/1303 scenes have transcript text
+  Checkpoint saved → output/all_scenes.json (727/1303 scenes with text)
+
+[3/3] Building SigLIP embeddings and FAISS index …
+Loading SigLIP model: google/siglip-base-patch16-224 …
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+The image processor of type `SiglipImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+Loading weights: 100%|██████████████████████████████████████████| 408/408 [00:00<00:00, 9695.61it/s]
+  Encoding 1303 keyframes …
+  SigLIP images:  81%|███████████████▍   | 1056/1303 [01:35<00:23, 10.67scene/s]  SigLIP images: 100%|███████████████████| 1303/1303 [01:58<00:00, 11.03scene/s]
+  Encoding 1303 transcripts …
+  SigLIP texts : 100%|███████████████████| 1303/1303 [00:30<00:00, 43.23scene/s]
+
+Vector DB saved to: db
+  visual.index  (1303, 768)
+  text.index    (1303, 768)
+  metadata.json 1303 records
+
+✓ Done! Run `python search.py --query "<your query>"` to test retrieval.
+(DL) alfa@MacBook-Pro-Alfa ai-chemp-cu-itmo % python3 app.py --vlm_provider openrouter --vlm_model qwen/qwen3.5-35b-a3b
+
+objc[90162]: Class AVFFrameReceiver is implemented in both /Users/alfa/envs/DL/lib/python3.11/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x101e903a8) and /Users/alfa/envs/DL/lib/python3.11/site-packages/av/.dylibs/libavdevice.62.1.100.dylib (0x128b103a8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+objc[90162]: Class AVFAudioReceiver is implemented in both /Users/alfa/envs/DL/lib/python3.11/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x101e903f8) and /Users/alfa/envs/DL/lib/python3.11/site-packages/av/.dylibs/libavdevice.62.1.100.dylib (0x128b103f8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+Loading FAISS database …
+Loading SigLIP model (google/siglip-base-patch16-224) on cpu …
+Loading SigLIP model: google/siglip-base-patch16-224 …
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+The image processor of type `SiglipImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+Loading weights: 100%|█████████████████████| 408/408 [00:00<00:00, 27730.49it/s]
+Ready! Starting Gradio …
+
+* Running on local URL:  http://127.0.0.1:7860
+* To create a public link, set `share=True` in `launch()`.
+  VLM re-rank:   0%|                                  | 0/30 [00:00<?, ?scene/s]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The image is completely black, providing no visual information to verify the action or characters.
+  VLM re-rank:   3%|▊                         | 1/30 [00:03<01:43,  3.57s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank:   7%|█▋                        | 2/30 [00:07<01:46,  3.82s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The video frames are completely black and contain no visual or audio information to determine the events.
+  VLM re-rank:  10%|██▌                       | 3/30 [00:10<01:27,  3.24s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank:  13%|███▍                      | 4/30 [00:14<01:35,  3.67s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank:  17%|████▎                     | 5/30 [00:18<01:34,  3.76s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank:  20%|█████▏                    | 6/30 [00:22<01:29,  3.72s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank:  23%|██████                    | 7/30 [00:25<01:25,  3.73s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The image is completely black, so no characters or actions are visible to determine if an arm was broken.
+  VLM re-rank:  27%|██████▉                   | 8/30 [00:29<01:24,  3.83s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank:  30%|███████▊                  | 9/30 [00:33<01:18,  3.72s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frame is completely black, so no characters or actions are visible to confirm the event.
+  VLM re-rank:  33%|████████▎                | 10/30 [00:37<01:17,  3.85s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The image is completely black and contains no visual information to determine if the action occurred.
+  VLM re-rank:  37%|█████████▏               | 11/30 [00:40<01:06,  3.52s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The video frames are completely black and contain no visual information to determine if the event described in the query occurred.
+  VLM re-rank:  40%|██████████               | 12/30 [00:42<00:56,  3.12s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank:  43%|██████████▊              | 13/30 [00:45<00:55,  3.26s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank:  47%|███████████▋             | 14/30 [00:49<00:53,  3.35s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The video frames are completely black and contain no visual information to determine if the event occurred.
+  VLM re-rank:  50%|████████████▌            | 15/30 [00:55<01:02,  4.18s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank:  53%|█████████████▎           | 16/30 [00:59<00:56,  4.04s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank:  57%|██████████████▏          | 17/30 [01:03<00:51,  3.98s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The provided frames are completely black, making it impossible to see any action or characters.
+  VLM re-rank:  60%|███████████████          | 18/30 [01:13<01:10,  5.91s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank:  63%|███████████████▊         | 19/30 [01:18<01:01,  5.58s/scene    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frame is completely black, so no characters or actions are visible to confirm the event.
+  VLM re-rank:  67%|████████████████▋        | 20/30 [01:22<00:51,  5.15s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=Изображение полностью черное, поэтому невозможно увидеть действие или персонажей.
+  VLM re-rank:  70%|█████████████████▌       | 21/30 [01:27<00:44,  4.99s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=Изображение полностью черное, поэтому невозможно увидеть действие или персонажей.
+  VLM re-rank:  73%|██████████████████▎      | 22/30 [01:32<00:40,  5.04s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank:  77%|███████████████████▏     | 23/30 [01:36<00:32,  4.71s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The video frames are completely black and contain no visual information to determine if the event described in the query occurred.
+  VLM re-rank:  80%|████████████████████     | 24/30 [01:39<00:24,  4.12s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The image is completely black, so no characters or actions are visible to confirm the event.
+  VLM re-rank:  83%|████████████████████▊    | 25/30 [01:42<00:20,  4.06s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The image is completely black, so no characters or actions are visible to confirm the event.
+  VLM re-rank:  87%|█████████████████████▋   | 26/30 [01:47<00:16,  4.12s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank:  90%|██████████████████████▌  | 27/30 [01:51<00:12,  4.03s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=Изображение полностью черное, невозможно увидеть действие или персонажей.
+  VLM re-rank:  93%|███████████████████████▎ | 28/30 [02:04<00:13,  6.96s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank:  97%|████████████████████████▏| 29/30 [02:08<00:06,  6.09s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На черном экране не видно ни персонажей, ни действий.
+  VLM re-rank: 100%|█████████████████████████| 30/30 [02:13<00:00,  4.44s/scene]
+  VLM re-rank:   0%|                                  | 0/30 [00:00<?, ?scene/s]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=Изображение полностью черное, поэтому невозможно увидеть персонажей или действие.
+  VLM re-rank:   3%|▊                         | 1/30 [00:03<01:41,  3.49s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=Предоставленное изображение полностью черное, поэтому невозможно увидеть персонажей или действие.
+  VLM re-rank:   7%|█▋                        | 2/30 [00:12<03:05,  6.62s/scene    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The provided image is completely black, making it impossible to see any characters or actions.
+  VLM re-rank:  10%|██▌                       | 3/30 [00:22<03:44,  8.31s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=Изображение полностью черное, поэтому невозможно увидеть персонажей или действие.
+  VLM re-rank:  13%|███▍                      | 4/30 [00:32<03:55,  9.07s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=Изображение полностью черное, на нем не видно ни персонажей, ни еды.
+  VLM re-rank:  17%|████▎                     | 5/30 [00:35<02:44,  6.59s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=Изображение полностью черное, на нем не видно ни персонажей, ни еды.
+  VLM re-rank:  20%|█████▏                    | 6/30 [00:37<02:04,  5.20s/scene]^CKeyboard interruption in main thread... closing server.
+    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=Изображение полностью черное и не содержит никаких видимых объектов или персонажей.
+  VLM re-rank:  23%|██████                    | 7/30 [00:45<02:22,  6.19s/scene]
+(DL) alfa@MacBook-Pro-Alfa ai-chemp-cu-itmo % pip uninstall av
+
+Found existing installation: av 16.1.0
+Uninstalling av-16.1.0:
+  Would remove:
+    /Users/alfa/envs/DL/bin/pyav
+    /Users/alfa/envs/DL/lib/python3.11/site-packages/av-16.1.0.dist-info/*
+    /Users/alfa/envs/DL/lib/python3.11/site-packages/av/*
+Proceed (Y/n)? y
+  Successfully uninstalled av-16.1.0
+(DL) alfa@MacBook-Pro-Alfa ai-chemp-cu-itmo % python3 app.py --data_dir "data/shrek" --vlm_provider openrouter --vlm_model qwen/qwen3.5-35b-a3b
+
+Loading FAISS database …
+Loading SigLIP model (google/siglip-base-patch16-224) on cpu …
+Loading SigLIP model: google/siglip-base-patch16-224 …
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+The image processor of type `SiglipImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+Loading weights: 100%|██████████████████████| 408/408 [00:00<00:00, 9496.96it/s]
+Ready! Starting Gradio …
+
+* Running on local URL:  http://127.0.0.1:7860
+* To create a public link, set `share=True` in `launch()`.
+  VLM re-rank:   0%|                                  | 0/30 [00:00<?, ?scene/s]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На кадрах изображено ночное небо с луной, а не персонажи за едой.
+  VLM re-rank:   3%|▊                         | 1/30 [00:05<02:27,  5.08s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, with no characters or food visible.
+  VLM re-rank:   7%|█▋                        | 2/30 [00:08<01:56,  4.16s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На кадрах изображено ночное небо с луной, а не персонажи за едой.
+  VLM re-rank:  10%|██▌                       | 3/30 [00:12<01:47,  3.99s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На кадрах изображено ночное небо с луной, а не персонажи за едой.
+  VLM re-rank:  13%|███▍                      | 4/30 [00:17<01:55,  4.44s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=Сцена показывает черный экран и луну, без персонажей или еды.
+  VLM re-rank:  17%|████▎                     | 5/30 [00:22<01:53,  4.54s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На кадрах изображено ночное небо с луной, а не персонажи за едой.
+  VLM re-rank:  20%|█████▏                    | 6/30 [00:26<01:42,  4.29s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На кадрах виден только лунный диск и облака, персонажи и еда отсутствуют.
+  VLM re-rank:  23%|██████                    | 7/30 [00:29<01:35,  4.14s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, not characters eating.
+  VLM re-rank:  27%|██████▉                   | 8/30 [00:33<01:25,  3.91s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На кадрах изображено ночное небо с луной, а не персонажи, едящие рагу.
+  VLM re-rank:  30%|███████▊                  | 9/30 [00:37<01:22,  3.95s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, with no characters or food visible.
+  VLM re-rank:  33%|████████▎                | 10/30 [00:41<01:18,  3.92s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The provided frames show a night sky with a moon and do not depict any characters or food.
+  VLM re-rank:  37%|█████████▏               | 11/30 [00:45<01:17,  4.07s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, with no characters or food visible.
+  VLM re-rank:  40%|██████████               | 12/30 [00:50<01:16,  4.28s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, with no characters or food visible.
+  VLM re-rank:  43%|██████████▊              | 13/30 [00:53<01:04,  3.80s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, with no characters or food visible.
+  VLM re-rank:  47%|███████████▋             | 14/30 [00:56<00:58,  3.68s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, with no characters or food visible.
+  VLM re-rank:  50%|████████████▌            | 15/30 [01:00<00:57,  3.83s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, with no characters or food visible.
+  VLM re-rank:  53%|█████████████▎           | 16/30 [01:04<00:53,  3.79s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На кадрах изображено ночное небо с луной, без персонажей или еды.
+  VLM re-rank:  57%|██████████████▏          | 17/30 [01:09<00:54,  4.16s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon and clouds, with no characters or food visible.
+  VLM re-rank:  60%|███████████████          | 18/30 [01:13<00:48,  4.03s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, lacking any characters or food.
+  VLM re-rank:  63%|███████████████▊         | 19/30 [01:17<00:46,  4.24s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, with no characters or food visible.
+  VLM re-rank:  67%|████████████████▋        | 20/30 [01:21<00:39,  3.98s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, not characters eating.
+  VLM re-rank:  70%|█████████████████▌       | 21/30 [01:23<00:32,  3.64s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На кадрах изображено ночное небо с луной, а не персонажи за едой.
+  VLM re-rank:  73%|██████████████████▎      | 22/30 [01:27<00:29,  3.72s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, not characters eating.
+  VLM re-rank:  77%|███████████████████▏     | 23/30 [01:31<00:25,  3.70s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, but no characters or food are visible.
+  VLM re-rank:  80%|████████████████████     | 24/30 [01:38<00:28,  4.71s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, not characters eating.
+  VLM re-rank:  83%|████████████████████▊    | 25/30 [01:41<00:20,  4.09s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, not characters eating.
+  VLM re-rank:  87%|█████████████████████▋   | 26/30 [01:44<00:15,  3.76s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На кадрах изображено ночное небо с луной, а не персонажи за едой.
+  VLM re-rank:  90%|██████████████████████▌  | 27/30 [01:48<00:11,  3.98s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames only show a night sky with a moon and do not contain any characters or food.
+  VLM re-rank:  93%|███████████████████████▎ | 28/30 [01:54<00:09,  4.66s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=The frames show a night sky with a crescent moon, not characters eating.
+  VLM re-rank:  97%|████████████████████████▏| 29/30 [01:57<00:04,  4.08s/scene]    Scene shrek.mp4 [0.0s]: VLM score=1.0, reason=На кадрах изображено ночное небо с луной, а не персонажи за едой.
+  VLM re-rank: 100%|█████████████████████████| 30/30 [02:01<00:00,  4.04s/scene]
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+^CKeyboard interruption in main thread... closing server.
+(DL) alfa@MacBook-Pro-Alfa ai-chemp-cu-itmo % python3 app.py --data_dir "data/shrek" --vlm_provider openrouter --vlm_model qwen/qwen3.5-35b-a3b
+
+Loading FAISS database …
+Loading SigLIP model (google/siglip-base-patch16-224) on cpu …
+Loading SigLIP model: google/siglip-base-patch16-224 …
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+The image processor of type `SiglipImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+Loading weights: 100%|█████████████████████| 408/408 [00:00<00:00, 24606.39it/s]
+Ready! Starting Gradio …
+
+* Running on local URL:  http://127.0.0.1:7860
+* To create a public link, set `share=True` in `launch()`.
+  VLM re-rank:   0%|                                  | 0/30 [00:00<?, ?scene/s]    Scene shrek.mp4 [3385.6s]: VLM score=1.0, reason=На кадрах Шрек и Фиона взаимодействуют с большим зеленым существом, а не едят рагу.
+  VLM re-rank:   3%|▊                         | 1/30 [00:06<03:00,  6.23s/scene]    Scene shrek.mp4 [4016.4s]: VLM score=1.0, reason=На кадрах изображены разговор с рыцарем и отдых, но нет процесса еды или рагу.
+  VLM re-rank:   7%|█▋                        | 2/30 [00:13<03:12,  6.87s/scene    Scene shrek.mp4 [797.6s]: VLM score=1.0, reason=На кадрах Шрек общается с гномами и смотрит на спящую принцессу в гробу, а не ест рагу с Фионой.
+  VLM re-rank:  10%|██▌                       | 3/30 [00:19<02:59,  6.65s/scene]    Scene shrek.mp4 [4130.5s]: VLM score=1.0, reason=Сцена показывает Шрека и Осла, идущих и разговаривающих, без Фионы или еды.
+  VLM re-rank:  13%|███▍                      | 4/30 [00:24<02:33,  5.92s/scene]    Scene shrek.mp4 [180.2s]: VLM score=3.0, reason=The frames show only Shrek eating from a bowl, while the query specifies both Fiona and Shrek eating together.
+  VLM re-rank:  17%|████▎                     | 5/30 [00:31<02:38,  6.34s/scene]    Scene shrek.mp4 [3713.0s]: VLM score=1.0, reason=На кадрах Фиона ласкает Осла, а не ест рагу со Шреком.
+  VLM re-rank:  20%|█████▏                    | 6/30 [00:35<02:12,  5.54s/scene]    Scene shrek.mp4 [3609.4s]: VLM score=1.0, reason=На изображении Шрек и Осел, а не Фиона, и они не едят рагу.
+  VLM re-rank:  23%|██████                    | 7/30 [00:40<02:03,  5.36s/scene]    Scene shrek.mp4 [363.5s]: VLM score=1.0, reason=На изображении изображены стражники и крестьянка, а не Фиона и Шрек, поедающие рагу.
+  VLM re-rank:  27%|██████▉                   | 8/30 [00:44<01:49,  4.99s/scene]    Scene shrek.mp4 [1639.1s]: VLM score=1.0, reason=На кадрах Шрек и Осел с луком в огороде, Фионы нет и рагу не едят.
+  VLM re-rank:  30%|███████▊                  | 9/30 [00:50<01:49,  5.21s/scene]    Scene shrek.mp4 [3895.8s]: VLM score=1.0, reason=На кадрах Фиона выглядит испуганной и разговаривает с Ослом, при этом Шрек и еда отсутствуют.
+  VLM re-rank:  33%|████████▎                | 10/30 [00:57<01:52,  5.65s/scene]    Scene shrek.mp4 [3614.2s]: VLM score=1.0, reason=На кадрах изображены Шрек и Осел у костра, а не Фиона с Шреком, и они не едят рагу.
+  VLM re-rank:  37%|█████████▏               | 11/30 [01:09<02:23,  7.56s/scene]    Scene shrek.mp4 [1846.6s]: VLM score=1.0, reason=The frames depict Shrek and Donkey on a bridge over lava, with no Fiona or food present.
+  VLM re-rank:  40%|██████████               | 12/30 [01:19<02:28,  8.28s/scene]    Scene shrek.mp4 [2764.1s]: VLM score=1.0, reason=На кадрах Шрек и Осел лежат на земле, Фионы и еды нет.
+  VLM re-rank:  43%|██████████▊              | 13/30 [01:23<02:01,  7.16s/scene]    Scene shrek.mp4 [3658.3s]: VLM score=1.0, reason=На кадрах изображён Осёл и мельница, а не Шрек и Фиона, которые едят рагу.
+  VLM re-rank:  47%|███████████▋             | 14/30 [01:28<01:41,  6.34s/scene]    Scene shrek.mp4 [3535.1s]: VLM score=3.0, reason=На кадрах Шрек и Фиона едят мясо на вертеле, а не рагу.
+  VLM re-rank:  50%|████████████▌            | 15/30 [01:33<01:32,  6.18s/scene]    Scene shrek.mp4 [4614.1s]: VLM score=1.0, reason=На кадрах изображена сцена с Шреком, Фионой и Фаркуадом в зале, а не процесс еды.
+  VLM re-rank:  53%|█████████████▎           | 16/30 [01:41<01:30,  6.47s/scene]    Scene shrek.mp4 [3552.0s]: VLM score=1.0, reason=На кадрах Фиона и Шрек сидят и разговаривают на закате, а не едят рагу.
+  VLM re-rank:  57%|██████████████▏          | 17/30 [01:49<01:31,  7.04s/scene]    Scene shrek.mp4 [4638.6s]: VLM score=1.0, reason=Персонажи стоят в свадебных нарядах и не едят рагу.
+  VLM re-rank:  60%|███████████████          | 18/30 [01:55<01:20,  6.68s/scene]    Scene shrek.mp4 [4441.2s]: VLM score=1.0, reason=На кадрах Шрек и Осел разговаривают, Фионы и еды нет.
+  VLM re-rank:  63%|███████████████▊         | 19/30 [02:00<01:07,  6.16s/scene]    Scene shrek.mp4 [3633.2s]: VLM score=1.0, reason=На кадрах Шрек уходит от костра, а Фиона отсутствует, и никто не ест.
+  VLM re-rank:  67%|████████████████▋        | 20/30 [02:09<01:09,  6.93s/scene]    Scene shrek.mp4 [763.5s]: VLM score=1.0, reason=Shrek is alone looking at a pumpkin, and Fiona is not present.
+  VLM re-rank:  70%|█████████████████▌       | 21/30 [02:11<00:51,  5.71s/scene]    Scene shrek.mp4 [1171.2s]: VLM score=1.0, reason=На кадрах Шрек в маске и стражники, нет Фионы и еды.
+  VLM re-rank:  73%|██████████████████▎      | 22/30 [02:17<00:45,  5.72s/scene]    Scene shrek.mp4 [4207.5s]: VLM score=2.0, reason=Shrek is present looking at a sunflower near a fire, but Fiona is missing and no stew is being eaten.
+  VLM re-rank:  77%|███████████████████▏     | 23/30 [02:22<00:37,  5.38s/scene]    Scene shrek.mp4 [1169.0s]: VLM score=1.0, reason=На кадрах изображен Лорд Фаркуад, а не Фиона и Шрек.
+  VLM re-rank:  80%|████████████████████     | 24/30 [02:28<00:33,  5.58s/scene]    Scene shrek.mp4 [250.5s]: VLM score=1.0, reason=Шрек разговаривает с толпой с факелом, Фионы и рагу нет.
+  VLM re-rank:  83%|████████████████████▊    | 25/30 [02:32<00:26,  5.24s/scene]    Scene shrek.mp4 [2034.4s]: VLM score=1.0, reason=Сцена показывает Шрека в доспехах рядом с драконом и лавой, а не Фину и Шрека за едой.
+  VLM re-rank:  87%|█████████████████████▋   | 26/30 [02:36<00:19,  4.76s/scene]    Scene shrek.mp4 [3020.0s]: VLM score=1.0, reason=Scene shows Shrek and Donkey on the ground, lacking Fiona and stew.
+  VLM re-rank:  90%|██████████████████████▌  | 27/30 [02:40<00:13,  4.61s/scene]    Scene shrek.mp4 [2111.7s]: VLM score=1.0, reason=На кадрах изображен дракон и Шрек с Фионой в комнате, но они не едят рагу.
+  VLM re-rank:  93%|███████████████████████▎ | 28/30 [02:44<00:08,  4.32s/scene]    Scene shrek.mp4 [1632.0s]: VLM score=1.0, reason=На кадрах Шрек и Осел находятся в огороде с капустой, а Фиона и процесс еды отсутствуют.
+  VLM re-rank:  97%|████████████████████████▏| 29/30 [02:48<00:04,  4.27s/scene]    Scene shrek.mp4 [582.7s]: VLM score=1.0, reason=На кадрах показан только Шрек и Осел, нет Фионы и еды.
+  VLM re-rank: 100%|█████████████████████████| 30/30 [02:51<00:00,  5.73s/scene]
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+^CKeyboard interruption in main thread... closing server.
+(DL) alfa@MacBook-Pro-Alfa ai-chemp-cu-itmo % python3 build_vectordb.py --data_dir "data/brat_cuted"                   
+Found 1 video(s): ['brat_cut.mp4']
+
+[1/3] Detecting scenes …
+  [brat_cut.mp4] 340 scenes detected
+  Total: 340 scenes → output/all_scenes.json
+  Scenes in memory: 340 (from 1 video(s))
+
+[2/3] Transcribing audio …
+  (1/1) Processing brat_cut.mp4 — 340 scenes
+  [brat_cut.mp4] Extracting audio …
+  [brat_cut.mp4] Starting Whisper-base subprocess (device=cpu) …
+  ERROR transcribing brat_cut.mp4, skipping:
+Traceback (most recent call last):
+  File "/Users/alfa/programming/videoRAG/ai-chemp-cu-itmo/build_vectordb.py", line 124, in main
+    transcribe_video(
+  File "/Users/alfa/programming/videoRAG/ai-chemp-cu-itmo/src/asr.py", line 224, in transcribe_video
+    segments = _run_whisper_subprocess(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alfa/programming/videoRAG/ai-chemp-cu-itmo/src/asr.py", line 172, in _run_whisper_subprocess
+    raise RuntimeError(f"Whisper worker error: {obj['message']}")
+RuntimeError: Whisper worker error: No module named 'av'
+
+[3/3] Building SigLIP embeddings and FAISS index …
+Loading SigLIP model: google/siglip-base-patch16-224 …
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+The image processor of type `SiglipImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+Loading weights: 100%|██████████████████████| 408/408 [00:00<00:00, 9151.94it/s]
+  Encoding 340 keyframes …
+  SigLIP images:  24%|█████▏                | 80/340 [00:08<00:25, 10.37scene/s]  SigLIP images:  24%|█████▏                | 80/340 [00:09<00:29,  8.71scene/s]
+Traceback (most recent call last):
+  File "/Users/alfa/programming/videoRAG/ai-chemp-cu-itmo/build_vectordb.py", line 166, in <module>
+    main()
+  File "/Users/alfa/programming/videoRAG/ai-chemp-cu-itmo/build_vectordb.py", line 155, in main
+    vis_embs = embed_images(image_paths, model, processor, args.device, args.img_batch)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alfa/programming/videoRAG/ai-chemp-cu-itmo/src/embed.py", line 159, in embed_images
+    out = model.vision_model(**img_inputs)      # BaseModelOutputWithPooling
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/transformers/models/siglip/modeling_siglip.py", line 615, in forward
+    encoder_outputs: BaseModelOutput = self.encoder(
+                                       ^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/transformers/models/siglip/modeling_siglip.py", line 467, in forward
+    hidden_states = encoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/transformers/modeling_layers.py", line 93, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/transformers/models/siglip/modeling_siglip.py", line 352, in forward
+    hidden_states, _ = self.self_attn(
+                       ^^^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/transformers/models/siglip/modeling_siglip.py", line 300, in forward
+    attn_output, attn_weights = attention_interface(
+                                ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/transformers/integrations/sdpa_attention.py", line 92, in sdpa_attention_forward
+    attn_output = torch.nn.functional.scaled_dot_product_attention(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+
+(DL) alfa@MacBook-Pro-Alfa ai-chemp-cu-itmo % pip install av
+Collecting av
+  Using cached av-16.1.0-cp311-cp311-macosx_14_0_arm64.whl.metadata (4.6 kB)
+Using cached av-16.1.0-cp311-cp311-macosx_14_0_arm64.whl (21.5 MB)
+Installing collected packages: av
+Successfully installed av-16.1.0
+
+[notice] A new release of pip is available: 25.0.1 -> 26.0.1
+[notice] To update, run: pip install --upgrade pip
+(DL) alfa@MacBook-Pro-Alfa ai-chemp-cu-itmo % python3 build_vectordb.py --data_dir "data/brat_cuted"
+objc[3555]: Class AVFFrameReceiver is implemented in both /Users/alfa/envs/DL/lib/python3.11/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x103d5c3a8) and /Users/alfa/envs/DL/lib/python3.11/site-packages/av/.dylibs/libavdevice.62.1.100.dylib (0x1174943a8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+objc[3555]: Class AVFAudioReceiver is implemented in both /Users/alfa/envs/DL/lib/python3.11/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x103d5c3f8) and /Users/alfa/envs/DL/lib/python3.11/site-packages/av/.dylibs/libavdevice.62.1.100.dylib (0x1174943f8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+Found 1 video(s): ['brat_cut.mp4']
+
+[1/3] Detecting scenes …
+  [brat_cut.mp4] 340 scenes detected
+  Total: 340 scenes → output/all_scenes.json
+  Scenes in memory: 340 (from 1 video(s))
+
+[2/3] Transcribing audio …
+  (1/1) Processing brat_cut.mp4 — 340 scenes
+  [brat_cut.mp4] Extracting audio …
+  [brat_cut.mp4] Starting Whisper-base subprocess (device=cpu) …
+  [brat_cut.mp4] Language: ru (prob=0.99), speech: 752s
+  [brat_cut.mp4] whisper: 100%|██████| 751.648/751.648 [01:15<00:00, 10.00sec/s]
+  [brat_cut.mp4] 336 segments received
+  [brat_cut.mp4] Assigning 336 segments to 340 scenes …
+  [brat_cut.mp4] Done — 149/340 scenes have transcript text
+  Checkpoint saved → output/all_scenes.json (149/340 scenes with text)
+
+[3/3] Building SigLIP embeddings and FAISS index …
+Loading SigLIP model: google/siglip-base-patch16-224 …
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+The image processor of type `SiglipImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+Loading weights: 100%|██████████████████████| 408/408 [00:00<00:00, 9285.12it/s]
+  Encoding 340 keyframes …
+  SigLIP images: 100%|█████████████████████| 340/340 [00:32<00:00, 10.39scene/s]
+  Encoding 340 transcripts …
+  SigLIP texts : 100%|█████████████████████| 340/340 [00:08<00:00, 41.78scene/s]
+
+Vector DB saved to: db
+  visual.index  (340, 768)
+  text.index    (340, 768)
+  metadata.json 340 records
+
+✓ Done! Run `python search.py --query "<your query>"` to test retrieval.
+(DL) alfa@MacBook-Pro-Alfa ai-chemp-cu-itmo % python3 app.py --data_dir "data/brat_cuted" --vlm_provider openrouter --vlm_model qwen/qwen3.5-35b-a3b
+
+objc[5207]: Class AVFFrameReceiver is implemented in both /Users/alfa/envs/DL/lib/python3.11/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x10115c3a8) and /Users/alfa/envs/DL/lib/python3.11/site-packages/av/.dylibs/libavdevice.62.1.100.dylib (0x12ff843a8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+objc[5207]: Class AVFAudioReceiver is implemented in both /Users/alfa/envs/DL/lib/python3.11/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x10115c3f8) and /Users/alfa/envs/DL/lib/python3.11/site-packages/av/.dylibs/libavdevice.62.1.100.dylib (0x12ff843f8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+Loading FAISS database …
+Loading SigLIP model (google/siglip-base-patch16-224) on cpu …
+Loading SigLIP model: google/siglip-base-patch16-224 …
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+The image processor of type `SiglipImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+Loading weights: 100%|█████████████████████| 408/408 [00:00<00:00, 61215.38it/s]
+Ready! Starting Gradio …
+
+* Running on local URL:  http://127.0.0.1:7860
+* To create a public link, set `share=True` in `launch()`.
+  VLM re-rank:   0%|                                  | 0/29 [00:00<?, ?scene/s    Scene brat_cut.mp4 [886.5s]: VLM score=1.0, reason=The scene depicts a confrontation where a character surrenders an item to avoid violence, rather than discussing an address.
+  VLM re-rank:   3%|▉                         | 1/29 [00:30<14:01, 30.05s/scene]    Scene brat_cut.mp4 [292.9s]: VLM score=1.0, reason=The frames only show a name credit "Vyacheslav Butusov" on a black background, with no visual information about an address or location.
+  VLM re-rank:   7%|█▊                        | 2/29 [00:35<07:00, 15.57s/scene^CKeyboard interruption in main thread... closing server.
+^CTraceback (most recent call last):
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/blocks.py", line 3073, in block_thread
+    time.sleep(0.1)
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/alfa/programming/videoRAG/ai-chemp-cu-itmo/app.py", line 405, in <module>
+    main()
+  File "/Users/alfa/programming/videoRAG/ai-chemp-cu-itmo/app.py", line 394, in main
+    demo.launch(server_port=args.port, share=args.share, theme=gr.themes.Soft())
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/blocks.py", line 2980, in launch
+    self.block_thread()
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/blocks.py", line 3077, in block_thread
+    self.server.close()
+  File "/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/http_server.py", line 82, in close
+    self.thread.join(timeout=5)
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/threading.py", line 1123, in join
+    self._wait_for_tstate_lock(timeout=max(timeout, 0))
+  File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/threading.py", line 1139, in _wait_for_tstate_lock
+    if lock.acquire(block, timeout):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+
+(DL) alfa@MacBook-Pro-Alfa ai-chemp-cu-itmo % python3 app.py --data_dir "data/brat_cuted" --vlm_provider openrouter --vlm_model qwen/qwen3.5-35b-a3b
+
+objc[7146]: Class AVFFrameReceiver is implemented in both /Users/alfa/envs/DL/lib/python3.11/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x1037143a8) and /Users/alfa/envs/DL/lib/python3.11/site-packages/av/.dylibs/libavdevice.62.1.100.dylib (0x1215783a8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+objc[7146]: Class AVFAudioReceiver is implemented in both /Users/alfa/envs/DL/lib/python3.11/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x1037143f8) and /Users/alfa/envs/DL/lib/python3.11/site-packages/av/.dylibs/libavdevice.62.1.100.dylib (0x1215783f8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+Loading FAISS database …
+Loading SigLIP model (google/siglip-base-patch16-224) on cpu …
+Loading SigLIP model: google/siglip-base-patch16-224 …
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+The image processor of type `SiglipImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. 
+Loading weights: 100%|██████████████████████████████████████| 408/408 [00:00<00:00, 44747.43it/s]
+Ready! Starting Gradio …
+
+* Running on local URL:  http://127.0.0.1:7860
+* To create a public link, set `share=True` in `launch()`.
+  VLM re-rank:   0%|                                                   | 0/28 [00:00<?, ?scene/s]    Scene brat_cut.mp4 [886.5s]: VLM score=1.0, reason=Сцена показывает конфликт в транспорте, а диалог не содержит информации об адресе.
+  VLM re-rank:   4%|█▌                                         | 1/28 [00:20<09:13, 20.49s/scene]    Scene brat_cut.mp4 [752.0s]: VLM score=1.0, reason=The scene shows characters walking in a cemetery with dialogue about Germans, which is unrelated to the address of Danila's brother.
+  VLM re-rank:   7%|███                                        | 2/28 [00:45<09:56, 22.95s/scene]    Scene brat_cut.mp4 [443.5s]: VLM score=1.0, reason=Сцена не содержит информации об адресе, только диалог и лица персонажей.
+  VLM re-rank:  11%|████▌                                      | 3/28 [00:50<06:17, 15.10s/scene]    Scene brat_cut.mp4 [353.5s]: VLM score=3.0, reason=The scene shows the mother and a photo of the brothers, mentioning the brother, but does not explicitly state the address.
+  VLM re-rank:  14%|██████▏                                    | 4/28 [01:02<05:29, 13.74s/scene]    Scene brat_cut.mp4 [278.4s]: VLM score=1.0, reason=В транскрипте нет адреса, только приказ уйти, а кадры не содержат информации о локации.
+  VLM re-rank:  18%|███████▋                                   | 5/28 [01:07<04:01, 10.49s/scene]    Scene brat_cut.mp4 [882.8s]: VLM score=1.0, reason=Сцена происходит в автобусе, диалог касается денег, а не адреса проживания.
+  VLM re-rank:  21%|█████████▏                                 | 6/28 [01:14<03:25,  9.32s/scene]    Scene brat_cut.mp4 [96.2s]: VLM score=1.0, reason=The scene contains no dialogue or visual text revealing an address, and the brother is not present.
+  VLM re-rank:  25%|██████████▊                                | 7/28 [01:22<03:10,  9.07s/scene]    Scene brat_cut.mp4 [1764.1s]: VLM score=1.0, reason=The scene shows a character in a market with unrelated dialogue, providing no information about a specific address or residence.
+  VLM re-rank:  29%|████████████▎                              | 8/28 [01:31<02:56,  8.80s/scene]    Scene brat_cut.mp4 [421.7s]: VLM score=1.0, reason=The frames depict a conversation and negotiation between characters, but do not show any address or the brother's residence.
+  VLM re-rank:  32%|█████████████▊                             | 9/28 [01:37<02    Scene brat_cut.mp4 [943.6s]: VLM score=1.0, reason=The scene shows a group of people talking on a street corner, but there is no visual or textual evidence in the provided transcript indicating a discussion about a specific address.
+  VLM re-rank:  36%|███████████████                           | 10/28 [02:07<04:29, 14.98s/scene]    Scene brat_cut.mp4 [464.1s]: VLM score=2.0, reason=Transcript is a fragment and visuals do not explicitly show the specific address.
+  VLM re-rank:  39%|████████████████▌                         | 11/28 [02:19<03:54, 13.78s/scene]    Scene brat_cut.mp4 [2140.7s]: VLM score=1.0, reason=The scene shows the brother injured in bed, but the transcript and visuals do not contain the specific address information requested.
+  VLM re-rank:  43%|██████████████████                        | 12/28 [02:26<03:11, 11.97s/scene]    Scene brat_cut.mp4 [1152.0s]: VLM score=1.0, reason=The scene shows a conversation in a record store with no visual or audio indication of an address being discussed or displayed.
+  VLM re-rank:  46%|███████████████████▌                      | 13/28 [02:39<03:01, 12.11s/scene]    Scene brat_cut.mp4 [890.6s]: VLM score=1.0, reason=The provided frames and transcript show a tense moment on public transport and a gun, but do not contain or mention the specific address of the brother.
+  VLM re-rank:  50%|█████████████████████                     | 14/28 [02:56<03:10, 13.62s/scene]    Scene brat_cut.mp4 [351.3s]: VLM score=1.0, reason=The scene depicts the interior of the apartment but neither the transcript nor the visuals explicitly state the specific address.
+  VLM re-rank:  54%|██████████████████████▌                   | 15/28 [03:06<02:42, 12.47s/scene]    Scene brat_cut.mp4 [988.0s]: VLM score=1.0, reason=The provided transcript discusses gaming slang ("slot", "boss") and does not contain any information about an address or Danila Bagrov's brother.
+  VLM re-rank:  57%|████████████████████████                  | 16/28 [03:20<02:35, 12.96s/scene]    Scene brat_cut.mp4 [783.5s]: VLM score=1.0, reason=The scene depicts characters visiting a grave in a cemetery, not discussing or showing a residential address.
+  VLM re-rank:  61%|█████████████████████████▍                | 17/28 [03:27<02:03, 11.26s/scene]    Scene brat_cut.mp4 [387.8s]: VLM score=1.0, reason=The scene shows the brother but contains no visual or audio information revealing his specific address.
+  VLM re-rank:  64%|███████████████████████████               | 18/28 [03:32<01:32,  9.23s/scene]    Scene brat_cut.mp4 [467.7s]: VLM score=9.0, reason=The frames show the exterior of the building where the brother lives.
+  VLM re-rank:  68%|████████████████████████████▌             | 19/28 [03:42<01:26,  9.61s/scene]    Scene brat_cut.mp4 [310.6s]: VLM score=1.0, reason=The scene shows a conversation between Danila and his mother about his behavior and clothes, with no mention of an address or his brother's location.
+  VLM re-rank:  71%|██████████████████████████████            | 20/28 [03:59<01:35, 11.88s/scene]    Scene brat_cut.mp4 [880.0s]: VLM score=1.0, reason=Сцена показывает персонажей в транспорте, но не содержит визуальной или текстовой информации о конкретном адресе.
+  VLM re-rank:  75%|███████████████████████████████▌          | 21/28 [04:08<01:17, 11.00s/scene]    Scene brat_cut.mp4 [79.7s]: VLM score=1.0, reason=The transcript indicates no speech, and the visual frames show characters in a scene without any visible address or text indicating a location.
+  VLM re-rank:  79%|█████████████████████████████████         | 22/28 [04:37<01:38, 16.39s/scene]    Scene brat_cut.mp4 [399.2s]: VLM score=1.0, reason=The video shows a scene with Danila and Viktor, but neither the visual setting nor the provided transcript mentions the specific address of Danila's brother.
+  VLM re-rank:  82%|██████████████████████████████████▌       | 23/28 [05:02<01:34, 18.82s/scene]    [WARN] Could not parse SCORE from response: 'None'
+    Scene brat_cut.mp4 [380.3s]: VLM score=0.0, reason=None
+  VLM re-rank:  86%|████████████████████████████████████      | 24/28 [05:11<01:03, 15.90s/scene]    Scene brat_cut.mp4 [2354.4s]: VLM score=1.0, reason=The frames show the character in a club and walking on the street, but do not depict the specific address or the moment it is revealed.
+  VLM re-rank:  89%|█████████████████████████████████████▌    | 25/28 [05:29<00:49, 16.66s/scene]    Scene brat_cut.mp4 [756.0s]: VLM score=1.0, reason=The transcript and visuals show a conversation in a cemetery but do not mention or display the specific address of the brother.
+  VLM re-rank:  93%|███████████████████████████████████████   | 26/28 [05:36<00:27, 13.78s/scene]    Scene brat_cut.mp4 [2332.5s]: VLM score=1.0, reason=The scene depicts characters in a record store but contains no visual or textual information about a specific address.
+  VLM re-rank:  96%|████████████████████████████████████████▌ | 27/28 [07:14<00:38, 38.82s/scene]    Scene brat_cut.mp4 [189.3s]: VLM score=8.0, reason=The scene depicts Danila Bagrov and his brother Sergey Platonovich, and the transcript explicitly mentions the brother's name, which is the key to finding his address.
+  VLM re-rank: 100%|██████████████████████████████████████████| 28/28 [07:25<00:  VLM re-rank: 100%|██████████████████████████████████████████| 28/28 [07:25<00:00, 15.92s/scene]
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+  VLM re-rank:   0%|                                  | 0/30 [00:00<?, ?scene/s]    Scene brat_cut.mp4 [292.9s]: VLM score=1.0, reason=The frames show only credits for an actor, with no visual content related to a tram or the described scene.
+  VLM re-rank:   3%|▊                         | 1/30 [00:05<02:53,  5.97s/scene    Scene brat_cut.mp4 [868.0s]: VLM score=8.0, reason=The images show Danila inside the tram holding a gun, matching the scene description, and the interior color is visible.
+  VLM re-rank:   7%|█▋                        | 2/30 [00:18<04:37,  9.90s/scene]    Scene brat_cut.mp4 [20.0s]: VLM score=1.0, reason=The images display a title card for the State Committee for Cinematography and contain no visual content related to a tram, characters, or action.
+  VLM re-rank:  10%|██▌                       | 3/30 [00:25<03:51,  8.57s/scene]    Scene brat_cut.mp4 [189.3s]: VLM score=1.0, reason=Сцена происходит в помещении, вероятно, в отделении полиции, и трамвай на кадрах отсутствует.
+  VLM re-rank:  13%|███▍                      | 4/30 [00:33<03:33,  8.20s/scene]    Scene brat_cut.mp4 [296.0s]: VLM score=1.0, reason=The frames show credits and a quiet indoor scene, completely unrelated to a tram chase or market murder.
+  VLM re-rank:  17%|████▎                     | 5/30 [00:39<03:05,  7.44s/scene]    Scene brat_cut.mp4 [278.4s]: VLM score=1.0, reason=The images show an indoor scene with a beaten man and a girl hiding, with no tram visible.
+  VLM re-rank:  20%|█████▏                    | 6/30 [00:48<03:10,  7.96s/scene]    Scene brat_cut.mp4 [184.0s]: VLM score=1.0, reason=The frames show only credits and black screens, with no visual content related to a tram, Danila, or the described scene.
+  VLM re-rank:  23%|██████                    | 7/30 [00:52<02:34,  6.73s/scene]    Scene brat_cut.mp4 [391.7s]: VLM score=1.0, reason=The images show an indoor conversation between two men, completely unrelated to a tram chase or market murder.
+  VLM re-rank:  27%|██████▉                   | 8/30 [00:58<02:19,  6.36s/scene    Scene brat_cut.mp4 [252.0s]: VLM score=1.0, reason=The frames show opening credits and a static street scene with a church, containing no tram, chase, or market scene described in the query.
+  VLM re-rank:  30%|███████▊                  | 9/30 [01:03<02:04,  5.94s/scene    Scene brat_cut.mp4 [2061.2s]: VLM score=1.0, reason=На кадрах показан интерьер помещения с людьми в дверном проеме, а не трамвай или погоня на улице.
+  VLM re-rank:  33%|████████▎                | 10/30 [01:17<02:53,  8.69s/scene    Scene brat_cut.mp4 [421.7s]: VLM score=1.0, reason=The images show an indoor conversation scene, not the tram chase described in the query.
+  VLM re-rank:  37%|█████████▏               | 11/30 [01:22<02:23,  7.57s/scene]    Scene brat_cut.mp4 [584.7s]: VLM score=1.0, reason=The frames depict a conversation in a shop and a man sitting by a river, with no tram or market scene present.
+  VLM re-rank:  40%|██████████               | 12/30 [01:29<02:08,  7.14s/scene]    Scene brat_cut.mp4 [247.7s]: VLM score=1.0, reason=The frames show credits for an actress, not the scene with the tram chase described in the query.
+  VLM re-rank:  43%|██████████▊              | 13/30 [01:50<03:15, 11.52s/scene]    Scene brat_cut.mp4 [344.5s]: VLM score=1.0, reason=The frames depict a quiet scene of a character looking through a photo album and eating, which has no relation to the action scene involving a tram chase described in the query.
+  VLM re-rank:  47%|███████████▋             | 14/30 [01:57<02:39,  9.96s/scene]    Scene brat_cut.mp4 [94.8s]: VLM score=1.0, reason=The frames depict a quiet scene with actors and equipment, showing no tram, chase, or market murder context.
+  VLM re-rank:  50%|████████████▌            | 15/30 [02:03<02:13,  8.93s/scene]    Scene brat_cut.mp4 [254.9s]: VLM score=1.0, reason=The images show a quiet town square and police officers, with no tram or chase scene visible.
+  VLM re-rank:  53%|█████████████▎           | 16/30 [02:08<01:46,  7.63s/scene]    Scene brat_cut.mp4 [79.7s]: VLM score=1.0, reason=The provided frames show a man sitting on a set and another standing near a wall, with no tram or chase scene visible.
+  VLM re-rank:  57%|██████████████▏          | 17/30 [02:14<01:33,  7.21s/scene]    Scene brat_cut.mp4 [380.3s]: VLM score=1.0, reason=The frames show the movie title and a character indoors, with no tram or chase scene visible.
+  VLM re-rank:  60%|███████████████          | 18/30 [02:19<01:17,  6.49s/scene]    Scene brat_cut.mp4 [276.0s]: VLM score=1.0, reason=На кадрах показаны титры и крупный план лица персонажа в помещении, без трамвая или погони.
+  VLM re-rank:  63%|███████████████▊         | 19/30 [02:40<01:58, 10.78s/scene]    Scene brat_cut.mp4 [1364.9s]: VLM score=1.0, reason=The frames show a character standing in a market, but there is no tram visible and no action of fleeing.
+  VLM re-rank:  67%|████████████████▋        | 20/30 [02:48<01:40, 10.04s/scene]    [WARN] Could not parse SCORE from response: 'None'
+    Scene brat_cut.mp4 [464.1s]: VLM score=0.0, reason=None
+  VLM re-rank:  70%|█████████████████▌       | 21/30 [02:56<01:24,  9.34s/scene]    Scene brat_cut.mp4 [2065.2s]: VLM score=1.0, reason=The frames show an indoor conversation between two men, whereas the query describes an action scene involving a tram chase.
+  VLM re-rank:  73%|██████████████████▎      | 22/30 [03:03<01:10,  8.87s/scene]    Scene brat_cut.mp4 [1758.4s]: VLM score=1.0, reason=The images depict a crowded market scene, but no tram is visible in any of the frames.
+  VLM re-rank:  77%|███████████████████▏     | 23/30 [03:10<00:57,  8.20s/scene]    Scene brat_cut.mp4 [890.6s]: VLM score=9.0, reason=The frames show Danila on the tram holding a gun, which corresponds to the scene described in the query where he is fleeing after the market incident.
+  VLM re-rank:  80%|████████████████████     | 24/30 [03:39<01:26, 14.50s/scene]    Scene brat_cut.mp4 [443.5s]: VLM score=1.0, reason=На кадрах показан диалог в помещении, без трамвая или погони.
+  VLM re-rank:  83%|████████████████████▊    | 25/30 [03:45<00:59, 11.99s/scene]    Scene brat_cut.mp4 [858.8s]: VLM score=2.0, reason=The images show the correct scene with Danila on the tram, but the exterior color of the tram is not visible.
+  VLM re-rank:  87%|████████████████████▊   | 26/30 [13:32<12:17, 184.30s/scene]    Scene brat_cut.mp4 [1388.9s]: VLM score=1.0, reason=The images depict a market scene with people standing and walking, but there is no tram visible and no one is running away.
+  VLM re-rank:  90%|█████████████████████▌  | 27/30 [13:44<06:38, 132.85s/scene]    Scene brat_cut.mp4 [783.5s]: VLM score=1.0, reason=На изображении показана группа людей в беседке на кладбище, а не трамвай и не погоня.
+  VLM re-rank:  93%|███████████████████████▎ | 28/30 [13:50<03:09, 94.54s/scene]    Scene brat_cut.mp4 [698.2s]: VLM score=1.0, reason=Сцена показывает убийство на рынке, но на кадрах нет трамвая.
+  VLM re-rank:  97%|████████████████████████▏| 29/30 [14:09<01:12, 72.08s/scene]    Scene brat_cut.mp4 [143.3s]: VLM score=1.0, reason=The frames depict an indoor interrogation scene, showing no tram or chase sequence.
+  VLM re-rank: 100%|█████████████████████████| 30/30 [14:16<00:00, 28.55s/scene]
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(
+/Users/alfa/envs/DL/lib/python3.11/site-packages/gradio/components/video.py:301: UserWarning: Video does not have browser-compatible container or codec. Converting to mp4.
+  warnings.warn(

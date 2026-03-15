@@ -8,9 +8,10 @@
 
 1. **Детекция сцен** — видео нарезается на сцены по изменению контента (PySceneDetect).
 2. **ASR** — для каждой сцены извлекается транскрипт речи (faster-whisper).
-3. **Эмбеддинги** — ключевые кадры и транскрипты кодируются через SigLIP в два FAISS-индекса.
-4. **Поиск** — текстовый запрос кодируется SigLIP; поиск по визуальному и речевому индексу объединяется через Reciprocal Rank Fusion (RRF).
-5. **VLM-ранжирование** — топ-кандидаты переранжируются VLM-моделью через Ollama или OpenRouter.
+3. **Метаданные** — сцены можно обогатить сезонами/эпизодами, персонажами и актёрами; фильм — summary и cast mapping.
+4. **Эмбеддинги** — ключевые кадры и транскрипты кодируются через SigLIP в два FAISS-индекса.
+5. **Поиск** — текстовый запрос кодируется SigLIP; поиск по визуальному и речевому индексу объединяется через Reciprocal Rank Fusion (RRF).
+6. **VLM-ранжирование** — топ-кандидаты переранжируются VLM-моделью через Ollama или OpenRouter.
 
 ---
 
@@ -30,19 +31,23 @@
 ├── app.py               # Gradio веб-интерфейс
 ├── build_vectordb.py    # Пайплайн: видео → FAISS БД
 ├── search.py            # CLI-поиск по готовой БД
+├── docker-compose.postgres.yml # PostgreSQL для метаданных (опционально)
 ├── requirements.txt
-├── data/                # Сюда кладём .mp4 файлы
+├── data/                # Видео + (опционально) референсы лиц актеров
+│   └── actors/          # data/actors/<Actor Name>/*.jpg
 ├── output/
 │   ├── all_scenes.json  # Найденные сцены
 │   └── keyframes/       # Ключевые кадры по видео
 ├── db/
 │   ├── visual.index     # FAISS-индекс по кадрам
 │   ├── text.index       # FAISS-индекс по транскриптам
-│   └── metadata.json    # Метаданные сцен
+│   ├── metadata.json    # Метаданные сцен
+│   └── film_metadata.json # Метаданные фильмов
 └── src/
     ├── scene_detect.py  # Детекция сцен
     ├── asr.py           # Транскрибация (Whisper)
-    ├── embed.py         # SigLIP эмбеддинги + FAISS
+    ├── embed.py         # SigLIP/BGE-M3 эмбеддинги + FAISS
+    ├── face_recognition.py # InsightFace: лица актеров в keyframes
     └── vlm_rerank.py    # VLM-ранжирование через Ollama/OpenRouter
 ```
 
@@ -68,14 +73,21 @@ pip install -r requirements.txt
 > ```env
 > OPENROUTER_API_KEY=sk-or-...
 > ```
+>
+> Для локального PostgreSQL:
+> ```bash
+> docker compose -f docker-compose.postgres.yml up -d
+> ```
 
 ---
 
 ## Использование
 
-### 1. Положить видео
+### 1. Положить видео (и при необходимости лица актеров)
 
-Скопируйте `.mp4` файлы в папку `data/`.
+Скопируйте видеофайлы (`.mp4` или `.mkv`) в папку `data/`.
+Для распознавания актеров добавьте референсные фото в `data/actors/`:
+`data/actors/<Имя актера>/<фото>.jpg`.
 
 ### 2. Построить базу данных
 
@@ -87,13 +99,48 @@ python build_vectordb.py
 
 | Флаг | По умолчанию | Описание |
 |---|---|---|
-| `--data_dir` | `data` | Папка с .mp4 |
+| `--data_dir` | `data` | Папка с видео (`.mp4`/`.mkv`) |
 | `--db_dir` | `db` | Куда сохранить FAISS |
 | `--whisper_model` | `base` | Размер Whisper: tiny/base/small/medium/large-v3 |
 | `--language` | авто | Код языка, напр. `ru` |
 | `--device` | `cpu` | `cpu` или `cuda` |
+| `--hf_cache_dir` | `.model_cache/hf` | Локальный кэш HuggingFace моделей (SigLIP) |
+| `--offline_models` | — | Загружать модели только из локального кэша (без скачивания) |
 | `--skip_asr` | — | Пропустить транскрибацию |
 | `--skip_scenes` | — | Переиспользовать scenes.json |
+| `--scene_metadata_json` | — | JSON с scene metadata overrides (`season_number`, `episode_number`, `characters_in_frame`, `actors_in_frame`, `transcript_text`) |
+| `--film_metadata_json` | — | JSON с film metadata (`plot_summary`, `cast_mapping`) |
+| `--enable_face_detection` | — | Включить детекцию/идентификацию лиц через InsightFace |
+| `--faces_dir` | `data/actors` | Папка с референсными фото актеров |
+| `--face_model` | `buffalo_l` | InsightFace model pack |
+| `--face_similarity_threshold` | `0.4` | Порог cosine similarity для матчинга актера |
+| `--pg_dsn` | — | PostgreSQL DSN для sync метаданных |
+| `--pg_schema` | `public` | PostgreSQL schema для таблиц `film_metadata` и `scene_metadata` |
+
+Пример запуска с метаданными и PostgreSQL:
+```bash
+python build_vectordb.py \
+  --enable_face_detection \
+  --faces_dir data/actors \
+  --scene_metadata_json notebooks/scene_metadata.sample.json \
+  --film_metadata_json notebooks/film_metadata.sample.json \
+  --pg_dsn "postgresql://video_rag:video_rag@localhost:5432/video_rag"
+```
+
+### Локальное хранилище моделей (без повторной загрузки)
+
+1. Один раз скачайте модели в локальный кэш:
+```bash
+python3 build_vectordb.py \
+  --hf_cache_dir .model_cache/hf
+```
+
+2. Дальше работайте офлайн (без интернета, если набор моделей не менялся):
+```bash
+python3 build_vectordb.py \
+  --hf_cache_dir .model_cache/hf \
+  --offline_models
+```
 
 ### 3. Поиск через CLI
 
@@ -108,6 +155,8 @@ python search.py --query "герой разговаривает с ослом" -
 |---|---|
 | `--mode` | `fused` (по умолчанию) / `visual` / `speech` |
 | `--top_k` | Количество результатов (по умолчанию 5) |
+| `--hf_cache_dir` | Локальный кэш HuggingFace моделей |
+| `--offline_models` | Загружать SigLIP только из локального кэша |
 | `--vlm` | Включить VLM-ранжирование |
 | `--vlm_provider` | Провайдер VLM: `ollama` (по умолчанию) или `openrouter` |
 | `--vlm_model` | Модель выбранного провайдера |
@@ -124,6 +173,7 @@ python app.py
 ```bash
 python app.py --device cuda --vlm_model qwen3.5:9b
 python app.py --vlm_provider openrouter --vlm_model openai/gpt-4o-mini
+python app.py --hf_cache_dir .model_cache/hf --offline_models
 ```
 
 ### Как выбирать модели в OpenRouter
@@ -147,3 +197,49 @@ python app.py --vlm_provider openrouter --vlm_model openai/gpt-4o-mini
 
 - Полная текстовая документация проекта: `docs/project_documentation.md`
 - Диаграмма потока данных и трансформаций: `docs/data_flow_diagram.md`
+
+## Формат новых метаданных
+
+`scene_metadata_json`:
+```json
+[
+  {
+    "video": "shrek.mp4",
+    "scene_id": 12,
+    "season_number": null,
+    "episode_number": null,
+    "characters_in_frame": ["Шрек", "Осёл"],
+    "actors_in_frame": ["Mike Myers", "Eddie Murphy"],
+    "transcript_text": "..."
+  }
+]
+```
+
+`film_metadata_json`:
+```json
+{
+  "shrek.mp4": {
+    "plot_summary": "Краткий синопсис фильма",
+    "cast_mapping": {
+      "Mike Myers": "Shrek",
+      "Eddie Murphy": "Donkey"
+    }
+  }
+}
+```
+
+`data/actors` (для InsightFace):
+```text
+data/actors/
+  Mike Myers/
+    01.jpg
+    02.jpg
+  Eddie Murphy/
+    ref.png
+```
+
+После включения `--enable_face_detection` pipeline:
+- детектит лица на keyframes каждой сцены,
+- заполняет `actors_in_frame`,
+- через `cast_mapping` добавляет `characters_in_frame`,
+- автоматически добавляет эту информацию в `transcript_text`/`subtitle` сцены на соответствующем таймлайне.

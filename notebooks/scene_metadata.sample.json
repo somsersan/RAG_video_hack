@@ -1,0 +1,11 @@
+[
+  {
+    "video": "shrek.mp4",
+    "scene_id": 0,
+    "season_number": null,
+    "episode_number": null,
+    "characters_in_frame": ["Shrek", "Donkey"],
+    "actors_in_frame": ["Mike Myers", "Eddie Murphy"],
+    "transcript_text": ""
+  }
+]

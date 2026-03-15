@@ -4,6 +4,8 @@ torchvision>=0.16.0
 
 # ── Scene detection ───────────────────────────────────────────────────────────
 scenedetect[opencv]>=0.6.3
+insightface>=0.7.3
+onnxruntime>=1.17.0
 
 # ── ASR ───────────────────────────────────────────────────────────────────────
 faster-whisper>=1.0.0
@@ -27,3 +29,6 @@ ffmpeg-python>=0.2.0       # Python wrapper (still needs ffmpeg binary on PATH)
 accelerate>=0.27.0         # speeds up HuggingFace model loading
 python-dotenv>=1.0.0       # .env file support (optional, builtin fallback included)
 gradio>=4.0.0             # Chat UI
+
+# ── Optional metadata storage ────────────────────────────────────────────────
+psycopg[binary]>=3.2.0    # PostgreSQL sync for scene/film metadata

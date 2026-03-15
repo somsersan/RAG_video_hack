@@ -12,11 +12,13 @@ Usage (standalone):
     python -m src.asr --video data/shrek.mp4 \
                       --scenes output/all_scenes.json \
                       --out    output/all_scenes.json \
-                      --model  base --device cuda
+                      --model  base --device cuda \
+                      --whisper_cache_dir .model_cache/whisper
 """
 
 import json
 import os
+import shutil
 import subprocess
 import tempfile
 import argparse
@@ -31,9 +33,17 @@ from tqdm import tqdm
 
 def _extract_audio(video_path: str, audio_path: str) -> None:
     """Use ffmpeg to extract mono 16 kHz WAV from video."""
+    ffmpeg_bin = shutil.which("ffmpeg")
+    if not ffmpeg_bin:
+        raise RuntimeError(
+            "ffmpeg binary not found in PATH. "
+            "Install ffmpeg and ensure it is available from terminal.\n"
+            "macOS (Homebrew): brew install ffmpeg\n"
+            "Ubuntu/Debian: sudo apt-get install ffmpeg"
+        )
     subprocess.run(
         [
-            "ffmpeg", "-y",
+            ffmpeg_bin, "-y",
             "-i", video_path,
             "-ac", "1",
             "-ar", "16000",
@@ -58,6 +68,7 @@ def _assign_segments_to_scenes(
     """
     for scene in scenes:
         scene["transcript"] = ""
+        scene["transcript_text"] = ""
 
     for seg in segments:
         seg_mid = (seg["start"] + seg["end"]) / 2.0
@@ -67,6 +78,7 @@ def _assign_segments_to_scenes(
                 if t:
                     prev = scene["transcript"]
                     scene["transcript"] = (prev + " " + t).strip()
+                    scene["transcript_text"] = scene["transcript"]
                 break
 
 
@@ -79,6 +91,8 @@ def _run_whisper_subprocess(
     device: str,
     compute_type: str,
     label: str,
+    download_root: Optional[str] = None,
+    local_files_only: bool = False,
 ) -> List[Dict]:
     """
     Spawn _whisper_worker.py and collect segments from its JSONL stdout.
@@ -94,6 +108,10 @@ def _run_whisper_subprocess(
         "--device",       device,
         "--compute_type", compute_type,
     ]
+    if download_root:
+        cmd.extend(["--download_root", download_root])
+    if local_files_only:
+        cmd.append("--local_files_only")
 
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"
@@ -181,6 +199,8 @@ def transcribe_video(
     language: Optional[str] = None,
     device: str = "cpu",
     compute_type: str = "int8",
+    whisper_cache_dir: Optional[str] = None,
+    local_files_only: bool = False,
 ) -> List[Dict]:
     """
     Transcribe *video_path* and attach transcripts to each entry in *scenes*.
@@ -194,6 +214,8 @@ def transcribe_video(
         compute_type = "float16"
 
     print(f"  [{label}] Extracting audio …")
+    if whisper_cache_dir:
+        Path(whisper_cache_dir).mkdir(parents=True, exist_ok=True)
 
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
         audio_path = tmp.name
@@ -202,7 +224,14 @@ def transcribe_video(
         _extract_audio(str(video_path), audio_path)
         print(f"  [{label}] Starting Whisper-{model_size} subprocess (device={device}) …")
         segments = _run_whisper_subprocess(
-            audio_path, model_size, language, device, compute_type, label
+            audio_path,
+            model_size,
+            language,
+            device,
+            compute_type,
+            label,
+            download_root=whisper_cache_dir,
+            local_files_only=local_files_only,
         )
     finally:
         Path(audio_path).unlink(missing_ok=True)
@@ -225,6 +254,8 @@ if __name__ == "__main__":
     parser.add_argument("--model",    default="base")
     parser.add_argument("--language", default=None)
     parser.add_argument("--device",   default="cpu")
+    parser.add_argument("--whisper_cache_dir", default=".model_cache/whisper")
+    parser.add_argument("--offline_models", action="store_true")
     args = parser.parse_args()
 
     with open(args.scenes, encoding="utf-8") as f:
@@ -233,7 +264,15 @@ if __name__ == "__main__":
     video_name   = Path(args.video).name
     video_scenes = [s for s in scenes if s["video"] == video_name]
 
-    transcribe_video(args.video, video_scenes, args.model, args.language, args.device)
+    transcribe_video(
+        args.video,
+        video_scenes,
+        args.model,
+        args.language,
+        args.device,
+        whisper_cache_dir=args.whisper_cache_dir,
+        local_files_only=args.offline_models,
+    )
 
     out_path = args.out or args.scenes
     with open(out_path, "w", encoding="utf-8") as f:

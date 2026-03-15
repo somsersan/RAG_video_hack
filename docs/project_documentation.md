@@ -43,7 +43,7 @@
 
 ### 2.3 Рабочие директории
 
-- `data/` — исходные `.mp4`;
+- `data/` — исходные видеофайлы (`.mp4` и `.mkv`);
 - `output/` — промежуточные артефакты (`all_scenes.json`, keyframes);
 - `db/` — готовая векторная БД (`visual.index`, `text.index`, `metadata.json`);
 - `docs/` — проектная документация.
@@ -216,6 +216,10 @@ python app.py --db_dir db --data_dir data --device cpu --vlm_provider openrouter
 3. Для VLM re-rank:
 - `ollama` provider: запущенный `ollama serve` и загруженная модель (`ollama pull qwen3.5:9b` или другая).
 - `openrouter` provider: заданный `OPENROUTER_API_KEY` (через переменную окружения или локальный `.env`, не коммитить в git).
+4. Для хранения моделей локально:
+- `--hf_cache_dir` для SigLIP (HuggingFace);
+- `--whisper_cache_dir` для faster-whisper;
+- `--offline_models` для запуска только из локального кэша (без загрузки из сети).
 
 ## 8. Ограничения текущей реализации
 
@@ -227,8 +231,8 @@ python app.py --db_dir db --data_dir data --device cpu --vlm_provider openrouter
 
 ## 9. Отладка и типовые проблемы
 
-1. `No .mp4 files found`  
-Проверьте, что видео лежат в `data/` и имеют расширение `.mp4`.
+1. `No video files found`  
+Проверьте, что видео лежат в `data/` и имеют поддерживаемое расширение (`.mp4` или `.mkv`).
 
 2. Ошибка `ffmpeg`  
 Убедитесь, что `ffmpeg` установлен и доступен из командной строки.
